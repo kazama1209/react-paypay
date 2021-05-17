@@ -31,8 +31,9 @@ const Reserve: React.FC = () => {
 
   // 支払い用URL
   const [paymentUrl, setPaymentUrl] = useState<string>("")
-  // 金額
+  // // 金額（商品が一つしか無いなら決め打ちでも良いかもしれないが、今回はサンプルなので動的に変更できるように）
   const [amount, setAmount] = useState<number | string | Array<number | string>>(10)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const handleSliderChange = (e: any, newAmount: number | number[]) => {
     setAmount(newAmount);
@@ -52,13 +53,14 @@ const Reserve: React.FC = () => {
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
+    setIsLoading(true)
   
     try {
       const res = await fetch("/.netlify/functions/paypay", {
         method: "POST",
         body: JSON.stringify({
           amount: amount,
-          orderDescription: "Test Payment" // 場合によってはここも動的にすると良いかも
+          orderDescription: "Test Payment" // 場合によってはここも動的に変更すると良いかも
         }),
         headers: { "Content-Type": "application/json" }
       })
@@ -72,6 +74,8 @@ const Reserve: React.FC = () => {
     } catch (err) {
       console.log(err)
     }
+
+    setIsLoading(false)
   }
 
   return (
@@ -109,10 +113,11 @@ const Reserve: React.FC = () => {
             <Button
               variant="outlined"
               color="primary"
+              disabled={isLoading ? true : false}
               onClick={handleSubmit}
               className={classes.submitBtn}
             >
-              Generate QR Code
+              {isLoading ? "Generating..." : "Generate QR Code"}
             </Button>
           </Grid>
         </Grid>
